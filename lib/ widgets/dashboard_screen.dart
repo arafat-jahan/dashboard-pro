@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
+import '../models/dashboard_card_model.dart';
 import 'animated_dashboard_card.dart';
 import 'chart_widget.dart';
 
@@ -11,7 +12,14 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  List cards = List.from(dashboardCards);
+  // Make sure your dashboardCards is typed properly in dummy_data.dart
+  late List<DashboardCardModel> cards;
+
+  @override
+  void initState() {
+    super.initState();
+    cards = List<DashboardCardModel>.from(dashboardCards);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 spacing: 16,
                 runSpacing: 16,
                 children: cards.map((card) {
-                  return LongPressDraggable(
+                  return LongPressDraggable<DashboardCardModel>(
                     data: card,
                     feedback: Material(
                       elevation: 12,
@@ -57,29 +65,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: AnimatedDashboardCard(model: card),
                       ),
                     ),
-                    child: DragTarget(
-                      onWillAccept: (data) => true,
+                    child: DragTarget<DashboardCardModel>(
+                      onWillAccept: (data) => data != card,
                       onAccept: (receivedItem) {
                         setState(() {
                           int oldIndex = cards.indexOf(receivedItem);
                           int newIndex = cards.indexOf(card);
-
                           final item = cards.removeAt(oldIndex);
                           cards.insert(newIndex, item);
                         });
                       },
                       builder: (context, candidateData, rejectedData) {
                         final isReceiving = candidateData.isNotEmpty;
-
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(24),
                             border: isReceiving
-                                ? Border.all(
-                              color: Colors.indigo,
-                              width: 2,
-                            )
+                                ? Border.all(color: Colors.indigo, width: 2)
                                 : null,
                             boxShadow: isReceiving
                                 ? [
@@ -134,8 +137,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: SizedBox(
-                    height: 460, // stacked line+bar chart height
-                    child: ChartWidget(), // Professional stacked/swappable chart
+                    height: 460,
+                    child: const ChartWidget(),
                   ),
                 ),
               ),

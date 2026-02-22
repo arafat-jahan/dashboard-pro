@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 
 class DashboardCardModel {
+  final String id; // ✅ MUST for reorder
   final String title;
   final IconData icon;
   final Color color;
-  final String? value;        // main metric
-  final String? subtitle;     // secondary info
-  final double? progress;     // 0.0 to 1.0, survey completion
-  final String? trend;        // "up", "down", "neutral"
-  final String? description;  // short insight
-  final String? lastUpdated;  // date/time
+  final String? value;
+  final String? subtitle;
+  final double? progress;
+  final String? trend;
+  final String? description;
+  final String? lastUpdated;
 
   DashboardCardModel({
+    required this.id,
     required this.title,
     required this.icon,
     required this.color,

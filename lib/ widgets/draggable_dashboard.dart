@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/dashboard_card_model.dart';
 import 'animated_dashboard_card.dart';
 
-
 class DraggableDashboard extends StatefulWidget {
   final List<DashboardCardModel> cards;
 
@@ -21,10 +20,7 @@ class _DraggableDashboardState extends State<DraggableDashboard> {
     _cards = List.from(widget.cards);
   }
 
-  void _reorderCard(
-      DashboardCardModel draggedCard,
-      DashboardCardModel targetCard,
-      ) {
+  void _reorderCard(DashboardCardModel draggedCard, DashboardCardModel targetCard) {
     final oldIndex = _cards.indexOf(draggedCard);
     final newIndex = _cards.indexOf(targetCard);
 
@@ -38,65 +34,65 @@ class _DraggableDashboardState extends State<DraggableDashboard> {
 
   @override
   Widget build(BuildContext context) {
-    final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final crossAxisCount = 2;
+    final spacing = 16.0;
+    final cardWidth = (screenWidth - ((crossAxisCount + 1) * spacing)) / crossAxisCount;
 
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
-      child: Wrap(
-        key: ValueKey(_cards.hashCode),
-        spacing: 16,
-        runSpacing: 16,
-        children: _cards.map((card) {
-          return LongPressDraggable<DashboardCardModel>(
-            data: card,
-
-            feedback: Material(
-              elevation: 12,
-              borderRadius: BorderRadius.circular(24),
-              child: SizedBox(
-                width: cardWidth,
-                child: AnimatedDashboardCard(model: card),
-              ),
-            ),
-
-            childWhenDragging: Opacity(
-              opacity: 0.15,
-              child: SizedBox(
-                width: cardWidth,
-                child: AnimatedDashboardCard(model: card),
-              ),
-            ),
-
-            child: DragTarget<DashboardCardModel>(
-              onWillAccept: (data) => true,
-              onAccept: (receivedCard) {
-                _reorderCard(receivedCard, card);
-              },
-              builder: (context, candidateData, rejectedData) {
-                final isHovering = candidateData.isNotEmpty;
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeInOut,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    border: isHovering
-                        ? Border.all(
-                      color: Colors.indigo,
-                      width: 2,
-                    )
-                        : null,
-                  ),
-                  child: SizedBox(
-                    width: cardWidth,
-                    child: AnimatedDashboardCard(model: card),
-                  ),
-                );
-              },
-            ),
-          );
-        }).toList(),
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
+        childAspectRatio: 1,
       ),
+      itemCount: _cards.length,
+      itemBuilder: (context, index) {
+        final card = _cards[index];
+
+        return LongPressDraggable<DashboardCardModel>(
+          data: card,
+          feedback: Material(
+            elevation: 12,
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox(
+              width: cardWidth,
+              child: AnimatedDashboardCard(model: card),
+            ),
+          ),
+          childWhenDragging: Opacity(
+            opacity: 0.3,
+            child: SizedBox(
+              width: cardWidth,
+              child: AnimatedDashboardCard(model: card),
+            ),
+          ),
+          child: DragTarget<DashboardCardModel>(
+            onWillAccept: (data) => data != card,
+            onAccept: (receivedCard) {
+              _reorderCard(receivedCard, card);
+            },
+            builder: (context, candidateData, rejectedData) {
+              final isHovering = candidateData.isNotEmpty;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(24),
+                  border: isHovering
+                      ? Border.all(color: Colors.indigo, width: 2)
+                      : null,
+                ),
+                child: SizedBox(
+                  width: cardWidth,
+                  child: AnimatedDashboardCard(model: card),
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

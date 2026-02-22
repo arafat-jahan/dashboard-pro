@@ -13,16 +13,13 @@ class _ChartWidgetState extends State<ChartWidget> {
   int selectedChart = 0;
   List<double> values = [3, 4, 6, 2, 5];
   List<double> pieValues = [40, 30, 15, 15];
-
   int touchedPieIndex = -1;
   final Random random = Random();
 
   void randomizeData() {
     setState(() {
-      values =
-          List.generate(values.length, (_) => random.nextDouble() * 10 + 1);
-      pieValues =
-          List.generate(4, (_) => random.nextInt(50).toDouble() + 10);
+      values = List.generate(values.length, (_) => random.nextDouble() * 10 + 1);
+      pieValues = List.generate(4, (_) => random.nextInt(50).toDouble() + 10);
     });
   }
 
@@ -34,66 +31,84 @@ class _ChartWidgetState extends State<ChartWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
+    return Scaffold(
+      backgroundColor: Colors.grey.shade100,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            /// SCROLLABLE CONTENT
+            Padding(
+              padding: const EdgeInsets.only(bottom: 80), // leave space for button
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    /// TOGGLE BUTTONS
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildToggleButton("Line", 0),
+                        const SizedBox(width: 12),
+                        _buildToggleButton("Bar", 1),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
 
-          /// TOGGLE BUTTONS
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildToggleButton("Line", 0),
-              const SizedBox(width: 12),
-              _buildToggleButton("Bar", 1),
-            ],
-          ),
+                    /// LINE / BAR SWITCHER
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 400),
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: ScaleTransition(scale: animation, child: child),
+                        );
+                      },
+                      child: selectedChart == 0
+                          ? _buildLineChart()
+                          : _buildBarChart(),
+                    ),
+                    const SizedBox(height: 32),
 
-          const SizedBox(height: 24),
-
-          /// LINE / BAR SWITCHER
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 400),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: animation,
-                  child: child,
-                ),
-              );
-            },
-            child: selectedChart == 0
-                ? _buildLineChart()
-                : _buildBarChart(),
-          ),
-
-          const SizedBox(height: 32),
-
-          /// PIE CHART
-          _buildPieChart(),
-
-          const SizedBox(height: 24),
-
-          /// RANDOM BUTTON
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: randomizeData,
-              icon: const Icon(Icons.refresh),
-              label: const Text("Randomize Data"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                    /// PIE CHART
+                    _buildPieChart(),
+                    const SizedBox(height: 24),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 40),
-        ],
+            /// FIXED BOTTOM RANDOMIZE BUTTON
+            Positioned(
+              bottom: 16,
+              left: 16,
+              right: 16,
+              child: SizedBox(
+                height: 55,
+                child: ElevatedButton.icon(
+                  onPressed: randomizeData,
+                  icon: const Icon(Icons.refresh_rounded, size: 22),
+                  label: const Text(
+                    "Randomize Data",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    elevation: 4,
+                    backgroundColor: Colors.indigo,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -106,8 +121,7 @@ class _ChartWidgetState extends State<ChartWidget> {
       onTap: () => switchChart(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding:
-        const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
         decoration: BoxDecoration(
           color: isActive ? Colors.indigo : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(30),
@@ -159,10 +173,7 @@ class _ChartWidgetState extends State<ChartWidget> {
           ),
           lineBarsData: [
             LineChartBarData(
-              spots: List.generate(
-                values.length,
-                    (i) => FlSpot(i.toDouble(), values[i]),
-              ),
+              spots: List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i])),
               isCurved: true,
               barWidth: 4,
               gradient: const LinearGradient(
@@ -255,8 +266,7 @@ class _ChartWidgetState extends State<ChartWidget> {
                     response.touchedSection == null) {
                   touchedPieIndex = -1;
                 } else {
-                  touchedPieIndex =
-                      response.touchedSection!.touchedSectionIndex;
+                  touchedPieIndex = response.touchedSection!.touchedSectionIndex;
                 }
               });
             },

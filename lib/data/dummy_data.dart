@@ -12,7 +12,7 @@ List<DashboardCardModel> dashboardCards = [
     progress: 0.95,
     trend: "up",
     description: "Number of people who completed surveys this month.",
-    lastUpdated: "Feb 22, 2026",
+    lastUpdated: "Feb 22, 2026", id: '',
   ),
   DashboardCardModel(
     title: "Average Satisfaction",
@@ -23,7 +23,7 @@ List<DashboardCardModel> dashboardCards = [
     progress: 0.84,
     trend: "up",
     description: "Overall customer satisfaction based on survey responses.",
-    lastUpdated: "Feb 22, 2026",
+    lastUpdated: "Feb 22, 2026", id: '',
   ),
   DashboardCardModel(
     title: "Pending Surveys",
@@ -34,7 +34,7 @@ List<DashboardCardModel> dashboardCards = [
     progress: 0.24,
     trend: "down",
     description: "Surveys not yet completed by respondents.",
-    lastUpdated: "Feb 22, 2026",
+    lastUpdated: "Feb 22, 2026", id: '',
   ),
   DashboardCardModel(
     title: "Positive Feedback",
@@ -45,7 +45,7 @@ List<DashboardCardModel> dashboardCards = [
     progress: 0.72,
     trend: "up",
     description: "Number of positive responses from the survey.",
-    lastUpdated: "Feb 22, 2026",
+    lastUpdated: "Feb 22, 2026", id: '',
   ),
   DashboardCardModel(
     title: "Negative Feedback",
@@ -56,6 +56,6 @@ List<DashboardCardModel> dashboardCards = [
     progress: 0.15,
     trend: "down",
     description: "Number of negative responses requiring action.",
-    lastUpdated: "Feb 22, 2026",
+    lastUpdated: "Feb 22, 2026", id: '',
   ),
 ];
