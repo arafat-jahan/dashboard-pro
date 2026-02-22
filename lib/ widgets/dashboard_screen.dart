@@ -11,7 +11,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-
   List cards = List.from(dashboardCards);
 
   @override
@@ -33,7 +32,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       body: CustomScrollView(
         slivers: [
-
           /// DASHBOARD GRID
           SliverPadding(
             padding: const EdgeInsets.all(16),
@@ -45,7 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   return LongPressDraggable(
                     data: card,
                     feedback: Material(
-                      elevation: 10,
+                      elevation: 12,
                       borderRadius: BorderRadius.circular(24),
                       child: SizedBox(
                         width: cardWidth,
@@ -53,7 +51,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                     childWhenDragging: Opacity(
-                      opacity: 0.2,
+                      opacity: 0.3,
                       child: SizedBox(
                         width: cardWidth,
                         child: AnimatedDashboardCard(model: card),
@@ -82,6 +80,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               color: Colors.indigo,
                               width: 2,
                             )
+                                : null,
+                            boxShadow: isReceiving
+                                ? [
+                              BoxShadow(
+                                color: Colors.indigo.withOpacity(0.2),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              )
+                            ]
                                 : null,
                           ),
                           child: SizedBox(
@@ -116,17 +123,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
 
           /// CHART SECTION
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverToBoxAdapter(
               child: Card(
-                elevation: 6,
-                shape: RoundedRectangleBorder(
+                elevation: 8,
+                shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(20)),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: ChartWidget(),
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    height: 460, // stacked line+bar chart height
+                    child: ChartWidget(), // Professional stacked/swappable chart
+                  ),
                 ),
               ),
             ),

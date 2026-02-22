@@ -14,21 +14,21 @@ class AnimatedDashboardCard extends StatefulWidget {
   });
 
   @override
-  State<AnimatedDashboardCard> createState() =>
-      _AnimatedDashboardCardState();
+  State<AnimatedDashboardCard> createState() => _AnimatedDashboardCardState();
 }
 
 class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
     with TickerProviderStateMixin {
-
   bool isExpanded = false;
   late AnimationController _iconController;
 
   @override
   void initState() {
     super.initState();
-    _iconController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _iconController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
   }
 
   void toggleCard() {
@@ -56,7 +56,7 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
         }
       },
       child: AnimatedScale(
-        scale: isExpanded ? 1.02 : 1,
+        scale: isExpanded ? 1.03 : 1.0,
         duration: const Duration(milliseconds: 300),
         child: AnimatedSize(
           duration: const Duration(milliseconds: 400),
@@ -70,6 +70,8 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
                   widget.model.color.withOpacity(0.9),
                   widget.model.color,
                 ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
@@ -84,10 +86,10 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                /// Top Row: Icon + Title + Expand Arrow
                 Row(
                   children: [
-                    Icon(widget.model.icon,
-                        color: Colors.white, size: 28),
+                    Icon(widget.model.icon, color: Colors.white, size: 28),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -100,16 +102,59 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
                       ),
                     ),
                     RotationTransition(
-                      turns: Tween(begin: 0.0, end: 0.5)
-                          .animate(_iconController),
+                      turns: Tween(begin: 0.0, end: 0.5).animate(_iconController),
                       child: const Icon(
                         Icons.keyboard_arrow_down,
                         color: Colors.white,
+                        size: 28,
                       ),
                     ),
                   ],
                 ),
 
+                /// Main Value & Subtitle
+                Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Row(
+                    children: [
+                      Text(
+                        widget.model.value ?? "",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          widget.model.subtitle ?? "",
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                /// Progress Bar (if available)
+                if (widget.model.progress != null) ...[
+                  const SizedBox(height: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: LinearProgressIndicator(
+                      value: widget.model.progress!.clamp(0.0, 1.0),
+                      backgroundColor: Colors.white24,
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.white),
+                      minHeight: 8,
+                    ),
+                  ),
+                ],
+
+                /// Expanded Analytics Section
                 if (isExpanded)
                   FadeTransition(
                     opacity: CurvedAnimation(
@@ -120,15 +165,28 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
                       padding: const EdgeInsets.only(top: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Divider(color: Colors.white54),
-                          SizedBox(height: 8),
+                        children: [
+                          const Divider(color: Colors.white54),
+                          const SizedBox(height: 8),
                           Text(
-                            "Expanded Analytics Content",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14),
+                            widget.model.description ?? "No details available",
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontSize: 14,
+                            ),
                           ),
+                          if (widget.model.lastUpdated != null)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Text(
+                                "Last Updated: ${widget.model.lastUpdated}",
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
