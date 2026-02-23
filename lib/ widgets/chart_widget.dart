@@ -16,10 +16,21 @@ class _ChartWidgetState extends State<ChartWidget> {
   int touchedPieIndex = -1;
   final Random random = Random();
 
+  /// expand state per card
+  Map<String, bool> expandedState = {
+    "main": false,
+    "pie": false,
+  };
+
+  /// card order
+  List<String> cardOrder = ["main", "pie"];
+
   void randomizeData() {
     setState(() {
-      values = List.generate(values.length, (_) => random.nextDouble() * 10 + 1);
-      pieValues = List.generate(4, (_) => random.nextInt(50).toDouble() + 10);
+      values =
+          List.generate(values.length, (_) => random.nextDouble() * 10 + 1);
+      pieValues =
+          List.generate(4, (_) => random.nextInt(50).toDouble() + 10);
     });
   }
 
@@ -29,274 +40,247 @@ class _ChartWidgetState extends State<ChartWidget> {
     });
   }
 
+  void swapCards(String from, String to) {
+    setState(() {
+      int fromIndex = cardOrder.indexOf(from);
+      int toIndex = cardOrder.indexOf(to);
+
+      final temp = cardOrder[fromIndex];
+      cardOrder[fromIndex] = cardOrder[toIndex];
+      cardOrder[toIndex] = temp;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
-        child: Stack(
-          children: [
-            /// SCROLLABLE CONTENT
-            Padding(
-              padding: const EdgeInsets.only(bottom: 80), // leave space for button
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    /// TOGGLE BUTTONS
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildToggleButton("Line", 0),
-                        const SizedBox(width: 12),
-                        _buildToggleButton("Bar", 1),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-
-                    /// LINE / BAR SWITCHER
-                    AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: ScaleTransition(scale: animation, child: child),
-                        );
-                      },
-                      child: selectedChart == 0
-                          ? _buildLineChart()
-                          : _buildBarChart(),
-                    ),
-                    const SizedBox(height: 32),
-
-                    /// PIE CHART
-                    _buildPieChart(),
-                    const SizedBox(height: 24),
-                  ],
-                ),
-              ),
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 80),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: cardOrder
+                  .map((id) => _buildDraggableCard(id))
+                  .toList(),
             ),
+          ),
+        ),
+      ),
+      floatingActionButton: SizedBox(
+        width: 200,
+        child: FloatingActionButton.extended(
+          onPressed: randomizeData,
+          label: const Text("Randomize Data"),
+          icon: const Icon(Icons.refresh),
+          backgroundColor: Colors.indigo,
+        ),
+      ),
+      floatingActionButtonLocation:
+      FloatingActionButtonLocation.centerFloat,
+    );
+  }
 
-            /// FIXED BOTTOM RANDOMIZE BUTTON
-            Positioned(
-              bottom: 16,
-              left: 16,
-              right: 16,
-              child: SizedBox(
-                height: 55,
-                child: ElevatedButton.icon(
-                  onPressed: randomizeData,
-                  icon: const Icon(Icons.refresh_rounded, size: 22),
-                  label: const Text(
-                    "Randomize Data",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    elevation: 4,
-                    backgroundColor: Colors.indigo,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                ),
+  /// ---------------- DRAGGABLE ----------------
+  Widget _buildDraggableCard(String id) {
+    return DragTarget<String>(
+      onWillAccept: (data) {
+        if (data != null && data != id) {
+          swapCards(data, id);
+        }
+        return true;
+      },
+      builder: (context, candidate, rejected) {
+        return LongPressDraggable<String>(
+          data: id,
+          feedback: Material(
+            color: Colors.transparent,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width - 32,
+              child: _buildCard(id, ValueKey("feedback_$id")),
+            ),
+          ),
+          child: _buildCard(id, ValueKey(id)),
+        );
+      },
+    );
+  }
+
+  /// ---------------- CARD ----------------
+  Widget _buildCard(String id, Key key) {
+    bool isExpanded = expandedState[id]!;
+
+    return GestureDetector(
+      key: key,
+      onTap: () {
+        setState(() {
+          expandedState[id] = !expandedState[id]!;
+        });
+      },
+      onHorizontalDragEnd: (details) {
+        if (id == "main" && details.primaryVelocity != null) {
+          if (details.primaryVelocity! < 0) {
+            switchChart((selectedChart + 1) % 2);
+          } else if (details.primaryVelocity! > 0) {
+            switchChart((selectedChart - 1 + 2) % 2);
+          }
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        margin: const EdgeInsets.only(bottom: 24),
+        padding: const EdgeInsets.all(16),
+        height: isExpanded ? 420 : 280,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: const [
+            BoxShadow(color: Colors.black12, blurRadius: 8)
+          ],
+        ),
+        child: id == "main"
+            ? Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildToggleButton("Line", 0),
+                const SizedBox(width: 12),
+                _buildToggleButton("Bar", 1),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration:
+                const Duration(milliseconds: 400),
+                child: selectedChart == 0
+                    ? _buildLineChart()
+                    : _buildBarChart(),
               ),
             ),
           ],
-        ),
+        )
+            : _buildPieChart(),
       ),
     );
   }
 
-  /// ---------------- TOGGLE BUTTON ----------------
   Widget _buildToggleButton(String text, int index) {
-    final bool isActive = selectedChart == index;
+    final isActive = selectedChart == index;
 
     return GestureDetector(
       onTap: () => switchChart(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        padding:
+        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? Colors.indigo : Colors.grey.shade300,
+          color:
+          isActive ? Colors.indigo : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
           text,
           style: TextStyle(
-            color: isActive ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.bold,
-          ),
+              color:
+              isActive ? Colors.white : Colors.black87,
+              fontWeight: FontWeight.bold),
         ),
       ),
     );
   }
 
-  /// ---------------- LINE CHART ----------------
   Widget _buildLineChart() {
-    return SizedBox(
-      key: const ValueKey("line"),
-      height: 260,
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    "P${(value + 1).toInt()}",
-                    style: const TextStyle(fontSize: 12),
-                  );
-                },
-              ),
+    return LineChart(
+      LineChartData(
+        lineBarsData: [
+          LineChartBarData(
+            spots: List.generate(
+                values.length,
+                    (i) => FlSpot(i.toDouble(), values[i])),
+            isCurved: true,
+            barWidth: 4,
+            gradient: const LinearGradient(
+              colors: [Colors.indigo, Colors.blue],
             ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                interval: 2,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    value.toStringAsFixed(0),
-                    style: const TextStyle(fontSize: 12),
-                  );
-                },
-              ),
-            ),
+            dotData: FlDotData(show: true),
           ),
-          lineBarsData: [
-            LineChartBarData(
-              spots: List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i])),
-              isCurved: true,
-              barWidth: 4,
-              gradient: const LinearGradient(
-                colors: [Colors.indigo, Colors.blue],
-              ),
-              dotData: FlDotData(show: true),
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.indigo.withOpacity(0.3),
-                    Colors.blue.withOpacity(0.1),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  /// ---------------- BAR CHART ----------------
   Widget _buildBarChart() {
-    return SizedBox(
-      key: const ValueKey("bar"),
-      height: 260,
-      child: BarChart(
-        BarChartData(
-          gridData: FlGridData(show: true),
-          borderData: FlBorderData(show: false),
-          titlesData: FlTitlesData(
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    "P${(value + 1).toInt()}",
-                    style: const TextStyle(fontSize: 12),
-                  );
-                },
-              ),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                interval: 2,
-                getTitlesWidget: (value, meta) {
-                  return Text(
-                    value.toStringAsFixed(0),
-                    style: const TextStyle(fontSize: 12),
-                  );
-                },
-              ),
-            ),
-          ),
-          barGroups: List.generate(values.length, (i) {
-            return BarChartGroupData(
-              x: i,
-              barRods: [
-                BarChartRodData(
-                  toY: values[i],
-                  width: 18,
-                  borderRadius: BorderRadius.circular(6),
-                  gradient: const LinearGradient(
-                    colors: [Colors.deepPurple, Colors.indigo],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                  ),
+    return BarChart(
+      BarChartData(
+        barGroups: List.generate(values.length, (i) {
+          return BarChartGroupData(
+            x: i,
+            barRods: [
+              BarChartRodData(
+                toY: values[i],
+                width: 18,
+                borderRadius: BorderRadius.circular(6),
+                gradient: const LinearGradient(
+                  colors: [
+                    Colors.deepPurple,
+                    Colors.indigo
+                  ],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
                 ),
-              ],
-            );
-          }),
-        ),
+              ),
+            ],
+          );
+        }),
       ),
     );
   }
 
-  /// ---------------- PIE CHART ----------------
   Widget _buildPieChart() {
-    return SizedBox(
-      height: 260,
-      child: PieChart(
-        PieChartData(
-          pieTouchData: PieTouchData(
-            touchCallback: (event, response) {
-              setState(() {
-                if (!event.isInterestedForInteractions ||
-                    response == null ||
-                    response.touchedSection == null) {
-                  touchedPieIndex = -1;
-                } else {
-                  touchedPieIndex = response.touchedSection!.touchedSectionIndex;
-                }
-              });
-            },
-          ),
-          sections: List.generate(pieValues.length, (i) {
-            final bool isTouched = i == touchedPieIndex;
-            final double radius = isTouched ? 80.0 : 65.0;
+    return PieChart(
+      PieChartData(
+        pieTouchData: PieTouchData(
+          touchCallback: (event, response) {
+            setState(() {
+              if (!event.isInterestedForInteractions ||
+                  response == null ||
+                  response.touchedSection == null) {
+                touchedPieIndex = -1;
+              } else {
+                touchedPieIndex =
+                    response.touchedSection!
+                        .touchedSectionIndex;
+              }
+            });
+          },
+        ),
+        sections: List.generate(pieValues.length, (i) {
+          final isTouched = i == touchedPieIndex;
+          final radius = isTouched ? 80.0 : 65.0;
 
-            final colors = [
-              Colors.indigo,
-              Colors.blue,
-              Colors.teal,
-              Colors.orange,
-            ];
+          final colors = [
+            Colors.indigo,
+            Colors.blue,
+            Colors.teal,
+            Colors.orange,
+          ];
 
-            return PieChartSectionData(
-              value: pieValues[i],
-              radius: radius,
-              title: "${pieValues[i].toInt()}%",
-              titleStyle: const TextStyle(
+          return PieChartSectionData(
+            value: pieValues[i],
+            radius: radius,
+            title: "${pieValues[i].toInt()}%",
+            titleStyle: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              color: colors[i],
-            );
-          }),
-          sectionsSpace: 2,
-          centerSpaceRadius: 40,
-        ),
+                color: Colors.white),
+            color: colors[i],
+          );
+        }),
+        sectionsSpace: 2,
+        centerSpaceRadius: 40,
       ),
     );
   }
