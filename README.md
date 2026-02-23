@@ -45,6 +45,10 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 |-----------------|-----------|
 | ![Charts Overview](https://i.imgur.com/GDLI7ik.png) | ![Line Chart](https://i.imgur.com/GDLI7ik2.png) |
 
+| Charts Overview | Bar Chart |
+|-----------------|-----------|
+| ![Charts Overview](https://i.imgur.com/BNk9UQ9.png) | ![Pie Chart](https://i.imgur.com/zBl1UdW.png) |
+
 ## ⚙️ Installation & Setup
 
 ### Requirements
@@ -57,5 +61,6 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 ```bash
 git clone https://github.com/yourusername/flutter_interactive_dashboard.git
 cd flutter_interactive_dashboard
+
 
 
