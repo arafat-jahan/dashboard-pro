@@ -35,18 +35,18 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 |  Expanded Card |
-|-----------|---------------|
+
 | ![ Expanded Card](https://i.imgur.com/deVQqPS.png) | 
 
 | Line Chart |
-|-----------------|-----------|
+
 | ![Line Char](https://i.imgur.com/GDLI7ik.png) | 
 
 |  Bar Chart | Pie Chart |
-|-----------------|-----------|
+
 | ![Bar Chart](https://i.imgur.com/BNk9UQ9.png) | ![Pie Chart](https://i.imgur.com/zBl1UdW.png) |
 
 ## ⚙️ Installation & Setup
@@ -56,11 +56,8 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 - Dart 3.0+  
 - Android Studio / VS Code  
 
-### Steps
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/flutter_interactive_dashboard.git
-cd flutter_interactive_dashboard
+
+
 
 
 
