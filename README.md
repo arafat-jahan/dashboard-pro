@@ -41,11 +41,11 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 
 | Dashboard | Expanded Card |
 |-----------|---------------|
-| ![Dashboard](screenshots/dashboard1.png) | ![Expanded Card](screenshots/dashboard2.png) |
+| ![Dashboard]([screenshots/dashboard1.png](https://i.imgur.com/deVQqPS.png) 
 
-| Charts Overview | Pie Chart |
+| Charts Overview | Line Chart |
 |-----------------|-----------|
-| ![Charts](screenshots/chart1.png) | ![Pie Chart](screenshots/piechart.png) |
+| ![Charts]([screenshots/chart1.png](https://i.imgur.com/GDLI7ik.png)) 
 
 ## ⚙️ Installation & Setup
 
@@ -59,3 +59,4 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 ```bash
 git clone https://github.com/yourusername/flutter_interactive_dashboard.git
 cd flutter_interactive_dashboard
+
