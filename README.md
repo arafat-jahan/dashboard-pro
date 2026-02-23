@@ -45,7 +45,7 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 
 ![Line Char](https://i.imgur.com/GDLI7ik.png) 
 
-  Bar Chart | Pie Chart 
+ | Bar Chart | Pie Chart |
 
  ![Bar Chart](https://i.imgur.com/BNk9UQ9.png) | ![Pie Chart](https://i.imgur.com/zBl1UdW.png) 
 
