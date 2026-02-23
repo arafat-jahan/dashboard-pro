@@ -39,15 +39,19 @@ This Flutter app demonstrates modern UI/UX design and interactive data visualiza
 
   Expanded Card 
 
- ![ Expanded Card](https://i.imgur.com/deVQqPS.png) 
+ [ Expanded Card](https://i.imgur.com/deVQqPS.png) 
 
  Line Chart 
 
-![Line Char](https://i.imgur.com/GDLI7ik.png) 
+[Line Char](https://i.imgur.com/GDLI7ik.png) 
 
- | Bar Chart | Pie Chart |
+ Bar Chart
 
- ![Bar Chart](https://i.imgur.com/BNk9UQ9.png) | ![Pie Chart](https://i.imgur.com/zBl1UdW.png) 
+ [Bar Chart](https://i.imgur.com/BNk9UQ9.png) 
+ 
+Pie Chart 
+  ![Pie Chart](https://i.imgur.com/zBl1UdW.png) 
+
 
 
 
