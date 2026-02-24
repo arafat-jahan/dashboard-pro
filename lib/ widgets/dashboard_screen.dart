@@ -33,7 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         title: const Text(
-          "VistaPanel Dashboard",
+          "InfiniPanel",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

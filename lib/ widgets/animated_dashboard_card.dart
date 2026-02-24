@@ -47,30 +47,32 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     return GestureDetector(
       onTap: toggleCard,
-
-      // Swipe left/right
       onHorizontalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
-
         if (velocity < 0) {
           widget.onSwipeLeft?.call();
         } else if (velocity > 0) {
           widget.onSwipeRight?.call();
         }
       },
-
       child: AnimatedScale(
-        scale: isExpanded ? 1.03 : 1.0,
+        scale: isExpanded ? 1.02 : 1.0,
         duration: const Duration(milliseconds: 300),
         child: AnimatedSize(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeInOut,
           child: Container(
-            padding: const EdgeInsets.all(16),
-            margin:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            width: double.infinity,
+            padding: EdgeInsets.all(isMobile ? 12 : 16),
+            margin: EdgeInsets.symmetric(
+              vertical: isMobile ? 8 : 10,
+              horizontal: isMobile ? 12 : 16,
+            ),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -80,67 +82,83 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(isMobile ? 18 : 24),
               boxShadow: [
                 BoxShadow(
                   blurRadius: 20,
                   spreadRadius: 2,
                   offset: const Offset(0, 10),
-                  color: widget.model.color.withOpacity(0.4),
+                  color: widget.model.color.withOpacity(0.35),
                 ),
               ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                /// Top Row
+                /// TOP ROW
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(widget.model.icon,
-                        color: Colors.white, size: 28),
-                    const SizedBox(width: 12),
+                    Icon(
+                      widget.model.icon,
+                      color: Colors.white,
+                      size: isMobile ? 22 : 28,
+                    ),
+                    const SizedBox(width: 10),
+
+                    /// Title
                     Expanded(
                       child: Text(
                         widget.model.title,
-                        style: const TextStyle(
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 18,
+                          fontSize: isMobile ? 14 : 18,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
+
                     RotationTransition(
                       turns: Tween(begin: 0.0, end: 0.5)
                           .animate(_iconController),
-                      child: const Icon(
+                      child: Icon(
                         Icons.keyboard_arrow_down,
                         color: Colors.white,
-                        size: 28,
+                        size: isMobile ? 22 : 28,
                       ),
                     ),
                   ],
                 ),
 
-                /// Main Value
+                /// MAIN VALUE
                 Padding(
-                  padding: const EdgeInsets.only(top: 12),
+                  padding: EdgeInsets.only(top: isMobile ? 8 : 12),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        widget.model.value ?? "",
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          widget.model.value ?? "",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: isMobile ? 18 : 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Expanded(
                         child: Text(
                           widget.model.subtitle ?? "",
-                          style: const TextStyle(
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
                             color: Colors.white70,
-                            fontSize: 14,
+                            fontSize: isMobile ? 11 : 14,
                           ),
                         ),
                       ),
@@ -148,24 +166,22 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
                   ),
                 ),
 
-                /// Progress
+                /// PROGRESS
                 if (widget.model.progress != null) ...[
-                  const SizedBox(height: 12),
+                  SizedBox(height: isMobile ? 8 : 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: LinearProgressIndicator(
-                      value: widget.model.progress!
-                          .clamp(0.0, 1.0),
+                      value: widget.model.progress!.clamp(0.0, 1.0),
                       backgroundColor: Colors.white24,
                       valueColor:
-                      const AlwaysStoppedAnimation<Color>(
-                          Colors.white),
-                      minHeight: 8,
+                      const AlwaysStoppedAnimation<Color>(Colors.white),
+                      minHeight: isMobile ? 6 : 8,
                     ),
                   ),
                 ],
 
-                /// Expanded Section
+                /// EXPANDED SECTION
                 if (isExpanded)
                   FadeTransition(
                     opacity: CurvedAnimation(
@@ -173,36 +189,29 @@ class _AnimatedDashboardCardState extends State<AnimatedDashboardCard>
                       curve: Curves.easeIn,
                     ),
                     child: Padding(
-                      padding:
-                      const EdgeInsets.only(top: 16),
+                      padding: EdgeInsets.only(top: isMobile ? 12 : 16),
                       child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Divider(
-                              color: Colors.white54),
+                          const Divider(color: Colors.white54),
                           const SizedBox(height: 8),
                           Text(
                             widget.model.description ??
                                 "No details available",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white70,
-                              fontSize: 14,
+                              fontSize: isMobile ? 12 : 14,
                             ),
                           ),
-                          if (widget.model.lastUpdated !=
-                              null)
+                          if (widget.model.lastUpdated != null)
                             Padding(
-                              padding:
-                              const EdgeInsets.only(
-                                  top: 6),
+                              padding: const EdgeInsets.only(top: 6),
                               child: Text(
                                 "Last Updated: ${widget.model.lastUpdated}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white54,
-                                  fontSize: 12,
-                                  fontStyle:
-                                  FontStyle.italic,
+                                  fontSize: isMobile ? 11 : 12,
+                                  fontStyle: FontStyle.italic,
                                 ),
                               ),
                             ),

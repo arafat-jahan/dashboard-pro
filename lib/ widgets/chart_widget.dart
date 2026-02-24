@@ -16,21 +16,17 @@ class _ChartWidgetState extends State<ChartWidget> {
   int touchedPieIndex = -1;
   final Random random = Random();
 
-  /// expand state per card
   Map<String, bool> expandedState = {
     "main": false,
     "pie": false,
   };
 
-  /// card order
   List<String> cardOrder = ["main", "pie"];
 
   void randomizeData() {
     setState(() {
-      values =
-          List.generate(values.length, (_) => random.nextDouble() * 10 + 1);
-      pieValues =
-          List.generate(4, (_) => random.nextInt(50).toDouble() + 10);
+      values = List.generate(values.length, (_) => random.nextDouble() * 10 + 1);
+      pieValues = List.generate(4, (_) => random.nextInt(50).toDouble() + 10);
     });
   }
 
@@ -40,32 +36,25 @@ class _ChartWidgetState extends State<ChartWidget> {
     });
   }
 
-  void swapCards(String from, String to) {
-    setState(() {
-      int fromIndex = cardOrder.indexOf(from);
-      int toIndex = cardOrder.indexOf(to);
-
-      final temp = cardOrder[fromIndex];
-      cardOrder[fromIndex] = cardOrder[toIndex];
-      cardOrder[toIndex] = temp;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 80),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: cardOrder
-                  .map((id) => _buildDraggableCard(id))
-                  .toList(),
-            ),
-          ),
+        child: ReorderableListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: cardOrder.length,
+          onReorder: (oldIndex, newIndex) {
+            setState(() {
+              if (newIndex > oldIndex) newIndex -= 1;
+              final item = cardOrder.removeAt(oldIndex);
+              cardOrder.insert(newIndex, item);
+            });
+          },
+          itemBuilder: (context, index) {
+            final id = cardOrder[index];
+            return _buildCard(id, ValueKey(id));
+          },
         ),
       ),
       floatingActionButton: SizedBox(
@@ -77,37 +66,11 @@ class _ChartWidgetState extends State<ChartWidget> {
           backgroundColor: Colors.indigo,
         ),
       ),
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  /// ---------------- DRAGGABLE ----------------
-  Widget _buildDraggableCard(String id) {
-    return DragTarget<String>(
-      onWillAccept: (data) {
-        if (data != null && data != id) {
-          swapCards(data, id);
-        }
-        return true;
-      },
-      builder: (context, candidate, rejected) {
-        return LongPressDraggable<String>(
-          data: id,
-          feedback: Material(
-            color: Colors.transparent,
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width - 32,
-              child: _buildCard(id, ValueKey("feedback_$id")),
-            ),
-          ),
-          child: _buildCard(id, ValueKey(id)),
-        );
-      },
-    );
-  }
-
-  /// ---------------- CARD ----------------
+  // ================= CARD =================
   Widget _buildCard(String id, Key key) {
     bool isExpanded = expandedState[id]!;
 
@@ -135,9 +98,7 @@ class _ChartWidgetState extends State<ChartWidget> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(color: Colors.black12, blurRadius: 8)
-          ],
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
         ),
         child: id == "main"
             ? Column(
@@ -153,11 +114,8 @@ class _ChartWidgetState extends State<ChartWidget> {
             const SizedBox(height: 16),
             Expanded(
               child: AnimatedSwitcher(
-                duration:
-                const Duration(milliseconds: 400),
-                child: selectedChart == 0
-                    ? _buildLineChart()
-                    : _buildBarChart(),
+                duration: const Duration(milliseconds: 400),
+                child: selectedChart == 0 ? _buildLineChart() : _buildBarChart(),
               ),
             ),
           ],
@@ -167,6 +125,7 @@ class _ChartWidgetState extends State<ChartWidget> {
     );
   }
 
+  // ================= TOGGLE BUTTON =================
   Widget _buildToggleButton(String text, int index) {
     final isActive = selectedChart == index;
 
@@ -174,37 +133,32 @@ class _ChartWidgetState extends State<ChartWidget> {
       onTap: () => switchChart(index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
-        padding:
-        const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 10),
         decoration: BoxDecoration(
-          color:
-          isActive ? Colors.indigo : Colors.grey.shade300,
+          color: isActive ? Colors.indigo : Colors.grey.shade300,
           borderRadius: BorderRadius.circular(30),
         ),
         child: Text(
           text,
           style: TextStyle(
-              color:
-              isActive ? Colors.white : Colors.black87,
-              fontWeight: FontWeight.bold),
+            color: isActive ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
     );
   }
 
+  // ================= LINE CHART =================
   Widget _buildLineChart() {
     return LineChart(
       LineChartData(
         lineBarsData: [
           LineChartBarData(
-            spots: List.generate(
-                values.length,
-                    (i) => FlSpot(i.toDouble(), values[i])),
+            spots: List.generate(values.length, (i) => FlSpot(i.toDouble(), values[i])),
             isCurved: true,
             barWidth: 4,
-            gradient: const LinearGradient(
-              colors: [Colors.indigo, Colors.blue],
-            ),
+            gradient: const LinearGradient(colors: [Colors.indigo, Colors.blue]),
             dotData: FlDotData(show: true),
           ),
         ],
@@ -212,6 +166,7 @@ class _ChartWidgetState extends State<ChartWidget> {
     );
   }
 
+  // ================= BAR CHART =================
   Widget _buildBarChart() {
     return BarChart(
       BarChartData(
@@ -224,10 +179,7 @@ class _ChartWidgetState extends State<ChartWidget> {
                 width: 18,
                 borderRadius: BorderRadius.circular(6),
                 gradient: const LinearGradient(
-                  colors: [
-                    Colors.deepPurple,
-                    Colors.indigo
-                  ],
+                  colors: [Colors.deepPurple, Colors.indigo],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                 ),
@@ -239,9 +191,24 @@ class _ChartWidgetState extends State<ChartWidget> {
     );
   }
 
+  // ================= PIE CHART =================
   Widget _buildPieChart() {
     return PieChart(
       PieChartData(
+        sections: List.generate(pieValues.length, (i) {
+          final isTouched = i == touchedPieIndex;
+          return PieChartSectionData(
+            value: pieValues[i],
+            radius: isTouched ? 70 : 60,
+            color: Colors.primaries[i % Colors.primaries.length],
+            title: "${pieValues[i].toInt()}%",
+            titleStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          );
+        }),
         pieTouchData: PieTouchData(
           touchCallback: (event, response) {
             setState(() {
@@ -249,38 +216,12 @@ class _ChartWidgetState extends State<ChartWidget> {
                   response == null ||
                   response.touchedSection == null) {
                 touchedPieIndex = -1;
-              } else {
-                touchedPieIndex =
-                    response.touchedSection!
-                        .touchedSectionIndex;
+                return;
               }
+              touchedPieIndex = response.touchedSection!.touchedSectionIndex;
             });
           },
         ),
-        sections: List.generate(pieValues.length, (i) {
-          final isTouched = i == touchedPieIndex;
-          final radius = isTouched ? 80.0 : 65.0;
-
-          final colors = [
-            Colors.indigo,
-            Colors.blue,
-            Colors.teal,
-            Colors.orange,
-          ];
-
-          return PieChartSectionData(
-            value: pieValues[i],
-            radius: radius,
-            title: "${pieValues[i].toInt()}%",
-            titleStyle: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Colors.white),
-            color: colors[i],
-          );
-        }),
-        sectionsSpace: 2,
-        centerSpaceRadius: 40,
       ),
     );
   }

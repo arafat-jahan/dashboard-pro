@@ -12,7 +12,7 @@ class VistaPanelApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "VistaPanel",
+      title: "InfiniPane",
       theme: ThemeData(
         useMaterial3: true,
         primarySwatch: Colors.indigo,
